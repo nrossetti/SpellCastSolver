@@ -1,0 +1,52 @@
+<script>
+class TrieNode {
+  constructor() {
+    this.children = {};
+    this.isEndOfWord = false;
+  }
+}
+
+class Trie {
+  constructor() {
+    this.root = new TrieNode();
+  }
+
+  insert(word) {
+    let node = this.root;
+    for (const char of word) {
+      if (!node.children[char]) {
+        node.children[char] = new TrieNode();
+      }
+      node = node.children[char];
+    }
+    node.isEndOfWord = true;
+  }
+
+  serialize() {
+    return JSON.stringify(this.root);
+  }
+}
+
+function download(content, fileName, contentType) {
+  const a = document.createElement("a");
+  const file = new Blob([content], { type: contentType });
+  a.href = URL.createObjectURL(file);
+  a.download = fileName;
+  a.click();
+}
+
+function buildAndDownloadTrieFromDictionary() {
+  fetch("scrabble.json")
+    .then(response => response.json())
+    .then(wordList => {
+      const trie = new Trie();
+      wordList.forEach(word => trie.insert(word));
+      const serializedTrie = trie.serialize();
+      download(serializedTrie, "trie.json", "application/json");
+    })
+    .catch(error => console.error("Error loading dictionary: ", error));
+}
+
+// Call this function when you want to build the trie and download it
+buildAndDownloadTrieFromDictionary();
+</script>
